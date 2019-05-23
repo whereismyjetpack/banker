@@ -11,7 +11,7 @@ steps:
   - export DOCKER_HOST=unix:///var/run/host.sock
   - docker login -u 'whereismyjetpack' -p $DOCKER_PASSWORD
   - docker build -t whereismyjetpack/banker:$DRONE_BUILD_NUMBER . 
-  - docker push whereismyetjpack/banker:$DRONE_BUILD_NUMBER 
+  - docker push whereismyjetpack/banker:$DRONE_BUILD_NUMBER 
   volumes:
   - name: docker-sock
     path: /var/run/host.sock
