@@ -1,0 +1,24 @@
+kind: pipeline
+name: default
+
+
+steps:
+- name: build
+  image: docker
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: DOCKER_PASSWORD
+  commands:
+  - export DOCKER_HOST=unix:///var/run/host.sock
+  - docker login -u 'whereismyjetpack' -p $DOCKER_PASSWORD
+  - docker build --build-arg SSH_PRIVATE_KEY=$SSH_PRIVATE_KEY -t whereismyjetpack/banker:$DRONE_BUILD_NUMBER . 
+  - docker push whereismyetjpack/banker:$DRONE_BUILD_NUMBER 
+  volumes:
+  - name: docker-sock
+    path: /var/run/host.sock
+
+volumes:
+- name: docker-sock
+  host:
+    path: /var/run/docker.sock
+
