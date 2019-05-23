@@ -8,5 +8,5 @@ COPY banker.py /app
 
 
 
-ENTRYPOINT ["python", "banker.py"]
+ENTRYPOINT ["python", "-m", "http.server"]
 
