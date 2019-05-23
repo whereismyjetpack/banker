@@ -1,0 +1,6 @@
+apiVersion: "banker.jetpack/v1"
+kind: Vault
+metadata:
+  name: foo
+spec:
+  path: "foo"
