@@ -1,0 +1,9 @@
+apiVersion: skaffold/v1beta9
+kind: Config
+build:
+  artifacts:
+  - image: whereismyjetpack/banker
+deploy:
+  kubectl:
+    manifests:
+    - deploy/deployment.yaml

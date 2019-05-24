@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: banker
+  namespace: vault-crd
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: banker
+    spec:
+      serviceAccountName: vault-crd-serviceaccount
+      containers:
+      - name: banker
+        image: whereismyjetpack/banker:8
+        env:
+        - name: KUBERNETES_VAULT_ROLE
+          value: vault-crd-dev
+        - name: VAULT_MOUNT_PATH
+          value: k8s-dsrd-dev
+        - name: VAULT_ADDR
+          value: "https://vault-test.dsrd.libraries.psu.edu:8200"
