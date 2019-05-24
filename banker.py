@@ -83,11 +83,12 @@ class Banker:
         body = kubernetes.client.V1Secret("v1", data, kind, metadata)
         try:
             logger.info(f"checking secret {name} in namespace {namespace}")
+            sec = v1.read_namespaced_secret(name, namespace)
+            print(sec)
             print(v1.create_namespaced_secret(namespace, body))
             logger.info(f"created secret {name} in namespace {namespace}")
         except kubernetes.client.rest.ApiException as e:
             if json.loads(e.body)["code"] == 409:
-                sec = v1.read_namespaced_secret(name, namespace)
                 if sec.data != data:
                     # TODO check if we own it before replacing
                     v1.replace_namespaced_secret(name, namespace, body)
@@ -137,8 +138,10 @@ class Banker:
 
     def run(self):
         if self.in_kubernetes:
+            logger.debug("we are in cluster")
             kubernetes.config.load_incluster_config()
         else:
+            logger.debug("we are not in cluster")
             kubernetes.config.load_kube_config()
 
         k8s_config = kubernetes.client.Configuration()
