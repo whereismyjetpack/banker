@@ -1,5 +1,7 @@
 .envrc
 __pycache__
 banker.1.py
+stuff_i_threw_away
+test
 .vscode
 .venv

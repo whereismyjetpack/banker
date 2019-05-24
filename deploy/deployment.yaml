@@ -19,7 +19,7 @@ spec:
       serviceAccountName: banker
       containers:
       - name: banker
-        image: whereismyjetpack/banker:10
+        image: whereismyjetpack/banker:12
         env:
         - name: KUBERNETES_VAULT_ROLE
           value: banker-dev
@@ -39,6 +39,9 @@ kind: ClusterRole
 metadata:
   name: banker
 rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
 - apiGroups: ["banker.jetpack"]
   resources: ["vault"]
   verbs: ["get", "watch", "list"]

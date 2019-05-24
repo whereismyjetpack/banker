@@ -7,6 +7,5 @@ RUN pip install -r requirements.txt
 COPY banker.py /app
 
 
-
-ENTRYPOINT ["python", "-m", "http.server"]
+ENTRYPOINT [ "python", "banker.py" ]
 
