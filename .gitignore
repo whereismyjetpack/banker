@@ -1,4 +1,5 @@
 .envrc
+__pycache__
 banker.1.py
 .vscode
 .venv
