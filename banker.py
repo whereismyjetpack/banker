@@ -83,7 +83,7 @@ class Banker:
         body = kubernetes.client.V1Secret("v1", data, kind, metadata)
         try:
             logger.info(f"checking secret {name} in namespace {namespace}")
-            v1.create_namespaced_secret(namespace, body)
+            print(v1.create_namespaced_secret(namespace, body))
             logger.info(f"created secret {name} in namespace {namespace}")
         except kubernetes.client.rest.ApiException as e:
             if json.loads(e.body)["code"] == 409:
