@@ -1,8 +1,14 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: banker
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: banker
-  namespace: vault-crd
+  namespace: banker
 spec:
   replicas: 1
   template:
@@ -10,14 +16,44 @@ spec:
       labels:
         app: banker
     spec:
-      serviceAccountName: vault-crd-serviceaccount
+      serviceAccountName: banker
       containers:
       - name: banker
-        image: whereismyjetpack/banker:8
+        image: whereismyjetpack/banker:10
         env:
         - name: KUBERNETES_VAULT_ROLE
-          value: vault-crd-dev
+          value: banker-dev
         - name: VAULT_MOUNT_PATH
           value: k8s-dsrd-dev
         - name: VAULT_ADDR
           value: "https://vault-test.dsrd.libraries.psu.edu:8200"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: banker
+  namespace: banker
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: banker
+rules:
+- apiGroups: ["banker.jetpack"]
+  resources: ["vault"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: banker-admin
+subjects:
+- kind: ServiceAccount
+  name: banker
+  namespace: banker
+roleRef:
+  kind: ClusterRole
+  name: banker
+  apiGroup: rbac.authorization.k8s.io
+
+
