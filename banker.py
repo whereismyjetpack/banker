@@ -85,14 +85,16 @@ class Banker:
             logger.info(f"checking secret {name} in namespace {namespace}")
             v1.create_namespaced_secret(namespace, body)
             logger.info(f"created secret {name} in namespace {namespace}")
-        except kubernetes.client.rest.ApiException as e:
-            if json.loads(e.body)["code"] == 409:
-                sec = v1.read_namespaced_secret(name, namespace)
-                if sec.data != data:
-                    # TODO check if we own it before replacing
-                    v1.replace_namespaced_secret(name, namespace, body)
-                    logger.debug("updating secret with new data")
-                logger.debug("secret already exists")
+        except:
+            logger.debug("failed to create_namespaced_secret")
+        # except kubernetes.client.rest.ApiException as e:
+        #     if json.loads(e.body)["code"] == 409:
+        #         sec = v1.read_namespaced_secret(name, namespace)
+        #         if sec.data != data:
+        #             # TODO check if we own it before replacing
+        #             v1.replace_namespaced_secret(name, namespace, body)
+        #             logger.debug("updating secret with new data")
+        #         logger.debug("secret already exists")
 
     def reconcile(self, client):
         logger.debug(f"starting reconciliation loop")
@@ -116,10 +118,13 @@ class Banker:
             logger.debug(f"Vault object {name} is missing path property")
         else:
             # TODO make this a function and do error checking
-            secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
-            data = secret["data"]["data"]
+            try:
+                secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
+                data = secret["data"]["data"]
+                self.create_secret(namespace, name, data, uid)
+            except:
+                logger.debug("failed to read_secret_version")
 
-            self.create_secret(namespace, name, data, uid)
 
     def watch_stream(self, client):
         crds_watch = kubernetes.client.CustomObjectsApi(client)
