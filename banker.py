@@ -115,7 +115,7 @@ class Banker:
         sync = obj["spec"].get("sync", None)
 
         # if not sync:
-        #     return 
+        #     return
 
         if not path:
             logger.debug(f"Vault object {name} is missing path property")
@@ -127,7 +127,6 @@ class Banker:
                 self.create_secret(namespace, name, data, uid)
             except Exception as e:
                 logger.debug(e)
-
 
     def watch_stream(self, client):
         crds_watch = kubernetes.client.CustomObjectsApi(client)
