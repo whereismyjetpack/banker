@@ -66,7 +66,6 @@ class Banker:
         return vault_client
 
     def create_secret(self, namespace, name, data, uid):
-        # create secret
         v1 = kubernetes.client.CoreV1Api()
         for k in data:
             data[k] = base64.b64encode(data[k].encode()).decode()
@@ -85,16 +84,16 @@ class Banker:
             logger.info(f"checking secret {name} in namespace {namespace}")
             v1.create_namespaced_secret(namespace, body)
             logger.info(f"created secret {name} in namespace {namespace}")
-        except:
-            logger.debug("failed to create_namespaced_secret")
-        # except kubernetes.client.rest.ApiException as e:
-        #     if json.loads(e.body)["code"] == 409:
-        #         sec = v1.read_namespaced_secret(name, namespace)
-        #         if sec.data != data:
-        #             # TODO check if we own it before replacing
-        #             v1.replace_namespaced_secret(name, namespace, body)
-        #             logger.debug("updating secret with new data")
-        #         logger.debug("secret already exists")
+        except kubernetes.client.rest.ApiException as e:
+            if json.loads(e.body)["code"] == 409:
+                sec = v1.read_namespaced_secret(name, namespace)
+                if sec.data != data:
+                    # TODO check if we own it before replacing
+                    v1.replace_namespaced_secret(name, namespace, body)
+                    logger.debug("updating secret with new data")
+                logger.debug("secret already exists")
+            else:
+                logger.debug(e)
 
     def reconcile(self, client):
         logger.debug(f"starting reconciliation loop")
@@ -122,8 +121,8 @@ class Banker:
                 secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
                 data = secret["data"]["data"]
                 self.create_secret(namespace, name, data, uid)
-            except:
-                logger.debug("failed to read_secret_version")
+            except Exception as e:
+                logger.debug(e)
 
 
     def watch_stream(self, client):
