@@ -112,6 +112,10 @@ class Banker:
         uid = obj["metadata"]["uid"]
 
         path = obj["spec"].get("path", None)
+        sync = obj["spec"].get("sync", None)
+
+        # if not sync:
+        #     return 
 
         if not path:
             logger.debug(f"Vault object {name} is missing path property")
