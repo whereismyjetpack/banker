@@ -13,15 +13,18 @@ from loguru import logger
 
 DOMAIN = "banker.jetpack"
 
-
 class Banker:
     def __init__(self):
         self.in_kubernetes = False
         self.get_config()
+        self.dont_sync = []
         self.vault_client = self.get_vault_client()
         self.run()
 
     def get_config(self):
+        logger.remove(0)
+        logger.add(sys.stderr, level=os.environ.get("BANKER_LOG_LEVEL", "INFO"))
+
         if "KUBERNETES_PORT" in os.environ:
             self.in_kubernetes = True
         else:
@@ -30,7 +33,7 @@ class Banker:
         valid_auth_types = ["ServiceAccount", "Token"]
 
         self.sync_frequency_seconds = os.environ.get("BANKER_SYNC_FREQUENCY_SECONDS", 60)
-        self.vault_addr = os.environ.get("VAULT_ADDR", "http://127.0.0.1:8200")
+        self.vault_addr = os.environ.get("VAULT_ADDR", "http://k127.0.0.1:8200")
         self.vault_token = os.environ.get("VAULT_TOKEN", None)
         self.vault_auth_type = os.environ.get("VAULT_AUTH_TYPE", "ServiceAccount")
         if self.vault_auth_type not in valid_auth_types:
@@ -82,7 +85,7 @@ class Banker:
         )
         body = kubernetes.client.V1Secret("v1", data, kind, metadata)
         try:
-            logger.info(f"checking secret {name} in namespace {namespace}")
+            logger.debug(f"checking secret {name} in namespace {namespace}")
             v1.create_namespaced_secret(namespace, body)
             logger.info(f"created secret {name} in namespace {namespace}")
         except kubernetes.client.rest.ApiException as e:
@@ -91,7 +94,7 @@ class Banker:
                 if sec.data != data:
                     # TODO check if we own it before replacing
                     v1.replace_namespaced_secret(name, namespace, body)
-                    logger.debug("updating secret with new data")
+                    logger.info("updating secret with new data")
                 logger.debug("secret already exists")
             else:
                 logger.debug(e)
@@ -105,18 +108,27 @@ class Banker:
             objs = dict(crds.list_cluster_custom_object(DOMAIN, "v1", "vault"))
             for obj in objs["items"]:
                 self.process_object(obj, "reconcile")
-            time.sleep(self.sync_frequency_seconds)
+            logger.debug(f"sleeping for {str(self.sync_frequency_seconds)}")
+            time.sleep(int(self.sync_frequency_seconds))
 
     def process_object(self, obj, caller):
         name = obj["metadata"]["name"]
         namespace = obj["metadata"]["namespace"]
         uid = obj["metadata"]["uid"]
-
         path = obj["spec"].get("path", None)
-        sync = obj["spec"].get("sync", None)
+        sync = obj["spec"].get("sync", False)
 
-        # if not sync:
-        #     return
+
+        # TODO test this
+        if sync and uid in self.dont_sync:
+            self.dont_sync.remove(uid)
+
+        if not sync:
+            self.dont_sync.append(uid)
+
+        if uid in self.dont_sync:
+            logger.debug(f"not syncing {name}")
+            return None
 
         if not path:
             logger.debug(f"Vault object {name} is missing path property")
