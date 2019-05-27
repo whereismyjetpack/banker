@@ -29,6 +29,7 @@ class Banker:
 
         valid_auth_types = ["ServiceAccount", "Token"]
 
+        self.sync_frequency_seconds = os.environ.get("BANKER_SYNC_FREQUENCY_SECONDS", 60)
         self.vault_addr = os.environ.get("VAULT_ADDR", "http://127.0.0.1:8200")
         self.vault_token = os.environ.get("VAULT_TOKEN", None)
         self.vault_auth_type = os.environ.get("VAULT_AUTH_TYPE", "ServiceAccount")
@@ -104,7 +105,7 @@ class Banker:
             objs = dict(crds.list_cluster_custom_object(DOMAIN, "v1", "vault"))
             for obj in objs["items"]:
                 self.process_object(obj, "reconcile")
-            time.sleep(60)
+            time.sleep(self.sync_frequency_seconds)
 
     def process_object(self, obj, caller):
         name = obj["metadata"]["name"]
