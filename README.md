@@ -1,6 +1,23 @@
 [![Build Status](https://drone-test.dsrd.libraries.psu.edu/api/badges/whereismyjetpack/banker/status.svg)](https://drone-test.dsrd.libraries.psu.edu/whereismyjetpack/banker)
 
 
+# Banker 🏦
+Banker is a controller meant to syncronize values from Vault, into proper Kubernetes secrets. 
+
+
+
+# Crd Spec 
+```
+apiVersion: "banker.jetpack/v1"
+kind: Vault
+metadata:
+  name: thingies
+spec:
+  path: "k8s-dev/newthing"
+  sync: false
+
+```
+
 ## Configuration 
 
 All Configuration is done via Environment variagles sent to the banker pod 
