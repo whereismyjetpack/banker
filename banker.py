@@ -23,6 +23,7 @@ class Banker:
 
     def get_config(self):
         logger.remove(0)
+        # TODO make json pattern
         logger.add(sys.stderr, level=os.environ.get("BANKER_LOG_LEVEL", "INFO"))
 
         if "KUBERNETES_PORT" in os.environ:
