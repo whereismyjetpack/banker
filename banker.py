@@ -171,7 +171,6 @@ class Banker:
         reconcile = Thread(target=self.reconcile, args=(api_client,))
         reconcile.start()
 
-        # while True:
         while True:
             if self.resource_version:
                 event_loop = Thread(target=self.watch_stream, args=(api_client,))
