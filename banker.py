@@ -19,6 +19,10 @@ class Banker:
         self.get_config()
         self.dont_sync = []
         self.vault_client = self.get_vault_client()
+        current_token = self.vault_client.lookup_token()
+        print(current_token['data']['ttl'])
+        # pp = pprint.PrettyPrinter(depth=6)
+        # pp.pprint(current_token)
         self.run()
 
     def get_config(self):
@@ -135,12 +139,10 @@ class Banker:
             logger.debug(f"Vault object {name} is missing path property")
         else:
             # TODO make this a function and do error checking
-            try:
-                secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
-                data = secret["data"]["data"]
-                self.create_secret(namespace, name, data, uid)
-            except Exception as e:
-                logger.debug(e)
+            logger.debug(f"reading secret from {path}")
+            secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
+            data = secret["data"]["data"]
+            self.create_secret(namespace, name, data, uid)
 
     def watch_stream(self, client):
         crds_watch = kubernetes.client.CustomObjectsApi(client)
@@ -156,6 +158,13 @@ class Banker:
             if event["type"] == "ADDED":
                 self.process_object(obj, "event_stream")
 
+    def renew_token(sleep_time):
+        while True:
+            time.sleep(sleep_time)
+            logger.debug(f"renewing vault token")
+            self.vault_client.renew_token()
+            logger.debug(f"renewed vault token")
+
     def run(self):
         if self.in_kubernetes:
             logger.debug("we are in cluster")
@@ -163,6 +172,13 @@ class Banker:
         else:
             logger.debug("we are not in cluster")
             kubernetes.config.load_kube_config()
+
+        ## check for ttl, start thread to renew
+        vault_token_ttl = self.vault_client.lookup_token()['data']['ttl']
+        if vault_token_ttl:
+            sleep_time = vault_token_ttl / 2
+            renew = Thread(target=self.renew_token, args=(sleep_time,))
+            renew.start()
 
         k8s_config = kubernetes.client.Configuration()
         k8s_config.assert_hostname = False
