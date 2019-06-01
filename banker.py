@@ -158,7 +158,7 @@ class Banker:
             if event["type"] == "ADDED":
                 self.process_object(obj, "event_stream")
 
-    def renew_token(sleep_time):
+    def renew_token(self, sleep_time):
         while True:
             time.sleep(sleep_time)
             logger.debug(f"renewing vault token")
