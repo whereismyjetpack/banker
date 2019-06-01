@@ -38,5 +38,6 @@ All Configuration is done via Environment variagles sent to the banker pod
 Open up `deploy/deployment.yaml` and configure for your environment
 
 ```
-kubectl apply -f deploy```
+kubectl apply -f deploy
+```
 
