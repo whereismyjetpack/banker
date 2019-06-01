@@ -8,7 +8,6 @@ import kubernetes
 from threading import Thread
 from loguru import logger
 
-
 DOMAIN = "banker.jetpack"
 
 
@@ -18,10 +17,6 @@ class Banker:
         self.get_config()
         self.dont_sync = []
         self.vault_client = self.get_vault_client()
-        current_token = self.vault_client.lookup_token()
-        print(current_token["data"]["ttl"])
-        # pp = pprint.PrettyPrinter(depth=6)
-        # pp.pprint(current_token)
         self.run()
 
     def get_config(self):
