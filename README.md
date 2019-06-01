@@ -20,7 +20,8 @@ spec:
 
 ## Configuration 
 
-All Configuration is done via Environment variagles sent to the banker pod 
+All Configuration is done via Environment variagles sent to the banker pod
+
 | Environment Variable   | Default               | Required |
 |------------------------|-----------------------|----------|
 | VAULT_ADDR             | http://127.0.0.1:8200 | No       |
