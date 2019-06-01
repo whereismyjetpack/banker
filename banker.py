@@ -13,6 +13,7 @@ from loguru import logger
 
 DOMAIN = "banker.jetpack"
 
+
 class Banker:
     def __init__(self):
         self.in_kubernetes = False
@@ -20,7 +21,7 @@ class Banker:
         self.dont_sync = []
         self.vault_client = self.get_vault_client()
         current_token = self.vault_client.lookup_token()
-        print(current_token['data']['ttl'])
+        print(current_token["data"]["ttl"])
         # pp = pprint.PrettyPrinter(depth=6)
         # pp.pprint(current_token)
         self.run()
@@ -37,7 +38,9 @@ class Banker:
 
         valid_auth_types = ["ServiceAccount", "Token"]
 
-        self.sync_frequency_seconds = os.environ.get("BANKER_SYNC_FREQUENCY_SECONDS", 60)
+        self.sync_frequency_seconds = os.environ.get(
+            "BANKER_SYNC_FREQUENCY_SECONDS", 60
+        )
         self.vault_addr = os.environ.get("VAULT_ADDR", "http://k127.0.0.1:8200")
         self.vault_token = os.environ.get("VAULT_TOKEN", None)
         self.vault_auth_type = os.environ.get("VAULT_AUTH_TYPE", "ServiceAccount")
@@ -123,7 +126,6 @@ class Banker:
         path = obj["spec"].get("path", None)
         sync = obj["spec"].get("sync", False)
 
-
         # TODO test this
         if sync and uid in self.dont_sync:
             self.dont_sync.remove(uid)
@@ -174,7 +176,7 @@ class Banker:
             kubernetes.config.load_kube_config()
 
         ## check for ttl, start thread to renew
-        vault_token_ttl = self.vault_client.lookup_token()['data']['ttl']
+        vault_token_ttl = self.vault_client.lookup_token()["data"]["ttl"]
         if vault_token_ttl:
             sleep_time = vault_token_ttl / 2
             renew = Thread(target=self.renew_token, args=(sleep_time,))
