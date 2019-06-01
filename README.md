@@ -31,5 +31,3 @@ All Configuration is done via Environment variagles sent to the banker pod
 | VAULT_MOUNT_PATH       | "kubernetes"          | No       |
 | SYNC_FREQUENCY_SECONDS | 60                    | No       |
 | BANKER_LOG_LEVEL       | INFO                  | No       |
-
-VAULT_ADDR: Address to the Vault server
