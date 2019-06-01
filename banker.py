@@ -1,15 +1,13 @@
 import hvac
-import pprint
 import os
 import base64
 import time
 import sys
-import asyncio
-import yaml
 import json
 import kubernetes
 from threading import Thread
 from loguru import logger
+
 
 DOMAIN = "banker.jetpack"
 
@@ -175,7 +173,7 @@ class Banker:
             logger.debug("we are not in cluster")
             kubernetes.config.load_kube_config()
 
-        ## check for ttl, start thread to renew
+        # check for ttl, start thread to renew
         vault_token_ttl = self.vault_client.lookup_token()["data"]["ttl"]
         if vault_token_ttl:
             sleep_time = vault_token_ttl / 2
