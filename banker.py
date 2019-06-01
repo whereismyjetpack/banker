@@ -38,9 +38,7 @@ class Banker:
         self.vault_token = os.environ.get("VAULT_TOKEN", None)
         self.vault_auth_type = os.environ.get("VAULT_AUTH_TYPE", "ServiceAccount")
         if self.vault_auth_type not in valid_auth_types:
-            logger.debug(
-                f"{self.vault_auth_type} is not a valid auth type. Defaulting to Token"
-            )
+            logger.debug(f"{self.vault_auth_type} is not a valid auth type. Defaulting to Token")
             self.vault_auth_type = "Token"
         self.kubernetes_vault_role = os.environ.get("KUBERNETES_VAULT_ROLE", None)
         self.vault_mount_path = os.environ.get("VAULT_MOUNT_PATH", "kubernetes")
@@ -119,14 +117,16 @@ class Banker:
         path = obj["spec"].get("path", None)
         sync = obj["spec"].get("sync", False)
 
-        # TODO test this
+        # if we are on the first pass, we sync
+        if uid not in self.seen_uids:
+            sync = True
+
+        # If a user adds sync: true to an already proccessed object
         if sync and uid in self.dont_sync:
             self.dont_sync.remove(uid)
 
         if not sync:
             self.dont_sync.append(uid)
-
-        if uid in self.dont_sync:
             logger.debug(f"not syncing {name}")
             return None
 
