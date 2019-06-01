@@ -15,6 +15,7 @@ class Banker:
     def __init__(self):
         self.in_kubernetes = False
         self.get_config()
+        self.truthy_values = ["true", "yes", "y"]
         self.dont_sync = []
         self.seen_uids = []
         self.vault_client = self.get_vault_client()
@@ -116,7 +117,12 @@ class Banker:
         namespace = obj["metadata"]["namespace"]
         uid = obj["metadata"]["uid"]
         path = obj["spec"].get("path", None)
-        sync = obj["spec"].get("sync", False)
+        sync = str(obj["spec"].get("sync", "false")).lower()
+
+        if sync in self.truthy_values:
+            sync = True
+        else:
+            sync = False
 
         # if we are on the first pass, we sync
         if uid not in self.seen_uids:
