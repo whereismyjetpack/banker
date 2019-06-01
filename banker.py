@@ -16,6 +16,7 @@ class Banker:
         self.in_kubernetes = False
         self.get_config()
         self.dont_sync = []
+        self.seen_uids = []
         self.vault_client = self.get_vault_client()
         self.run()
 
@@ -125,9 +126,12 @@ class Banker:
         if sync and uid in self.dont_sync:
             self.dont_sync.remove(uid)
 
-        if not sync:
+        if not sync and uid not in self.dont_sync:
             self.dont_sync.append(uid)
             logger.debug(f"not syncing {name}")
+            return None
+
+        if not sync:
             return None
 
         if not path:
