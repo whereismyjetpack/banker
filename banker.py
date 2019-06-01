@@ -13,15 +13,23 @@ from loguru import logger
 
 DOMAIN = "banker.jetpack"
 
-
 class Banker:
     def __init__(self):
         self.in_kubernetes = False
         self.get_config()
+        self.dont_sync = []
         self.vault_client = self.get_vault_client()
+        current_token = self.vault_client.lookup_token()
+        print(current_token['data']['ttl'])
+        # pp = pprint.PrettyPrinter(depth=6)
+        # pp.pprint(current_token)
         self.run()
 
     def get_config(self):
+        logger.remove(0)
+        # TODO make json pattern
+        logger.add(sys.stderr, level=os.environ.get("BANKER_LOG_LEVEL", "INFO"))
+
         if "KUBERNETES_PORT" in os.environ:
             self.in_kubernetes = True
         else:
@@ -29,7 +37,8 @@ class Banker:
 
         valid_auth_types = ["ServiceAccount", "Token"]
 
-        self.vault_addr = os.environ.get("VAULT_ADDR", "http://127.0.0.1:8200")
+        self.sync_frequency_seconds = os.environ.get("BANKER_SYNC_FREQUENCY_SECONDS", 60)
+        self.vault_addr = os.environ.get("VAULT_ADDR", "http://k127.0.0.1:8200")
         self.vault_token = os.environ.get("VAULT_TOKEN", None)
         self.vault_auth_type = os.environ.get("VAULT_AUTH_TYPE", "ServiceAccount")
         if self.vault_auth_type not in valid_auth_types:
@@ -81,7 +90,7 @@ class Banker:
         )
         body = kubernetes.client.V1Secret("v1", data, kind, metadata)
         try:
-            logger.info(f"checking secret {name} in namespace {namespace}")
+            logger.debug(f"checking secret {name} in namespace {namespace}")
             v1.create_namespaced_secret(namespace, body)
             logger.info(f"created secret {name} in namespace {namespace}")
         except kubernetes.client.rest.ApiException as e:
@@ -90,7 +99,7 @@ class Banker:
                 if sec.data != data:
                     # TODO check if we own it before replacing
                     v1.replace_namespaced_secret(name, namespace, body)
-                    logger.debug("updating secret with new data")
+                    logger.info("updating secret with new data")
                 logger.debug("secret already exists")
             else:
                 logger.debug(e)
@@ -104,29 +113,36 @@ class Banker:
             objs = dict(crds.list_cluster_custom_object(DOMAIN, "v1", "vault"))
             for obj in objs["items"]:
                 self.process_object(obj, "reconcile")
-            time.sleep(60)
+            logger.debug(f"sleeping for {str(self.sync_frequency_seconds)}")
+            time.sleep(int(self.sync_frequency_seconds))
 
     def process_object(self, obj, caller):
         name = obj["metadata"]["name"]
         namespace = obj["metadata"]["namespace"]
         uid = obj["metadata"]["uid"]
-
         path = obj["spec"].get("path", None)
-        sync = obj["spec"].get("sync", None)
+        sync = obj["spec"].get("sync", False)
 
-        # if not sync:
-        #     return
+
+        # TODO test this
+        if sync and uid in self.dont_sync:
+            self.dont_sync.remove(uid)
+
+        if not sync:
+            self.dont_sync.append(uid)
+
+        if uid in self.dont_sync:
+            logger.debug(f"not syncing {name}")
+            return None
 
         if not path:
             logger.debug(f"Vault object {name} is missing path property")
         else:
             # TODO make this a function and do error checking
-            try:
-                secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
-                data = secret["data"]["data"]
-                self.create_secret(namespace, name, data, uid)
-            except Exception as e:
-                logger.debug(e)
+            logger.debug(f"reading secret from {path}")
+            secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
+            data = secret["data"]["data"]
+            self.create_secret(namespace, name, data, uid)
 
     def watch_stream(self, client):
         crds_watch = kubernetes.client.CustomObjectsApi(client)
@@ -142,6 +158,13 @@ class Banker:
             if event["type"] == "ADDED":
                 self.process_object(obj, "event_stream")
 
+    def renew_token(self, sleep_time):
+        while True:
+            time.sleep(sleep_time)
+            logger.debug(f"renewing vault token")
+            self.vault_client.renew_token()
+            logger.debug(f"renewed vault token")
+
     def run(self):
         if self.in_kubernetes:
             logger.debug("we are in cluster")
@@ -150,6 +173,13 @@ class Banker:
             logger.debug("we are not in cluster")
             kubernetes.config.load_kube_config()
 
+        ## check for ttl, start thread to renew
+        vault_token_ttl = self.vault_client.lookup_token()['data']['ttl']
+        if vault_token_ttl:
+            sleep_time = vault_token_ttl / 2
+            renew = Thread(target=self.renew_token, args=(sleep_time,))
+            renew.start()
+
         k8s_config = kubernetes.client.Configuration()
         k8s_config.assert_hostname = False
         api_client = kubernetes.client.api_client.ApiClient(configuration=k8s_config)
@@ -157,7 +187,6 @@ class Banker:
         reconcile = Thread(target=self.reconcile, args=(api_client,))
         reconcile.start()
 
-        # while True:
         while True:
             if self.resource_version:
                 event_loop = Thread(target=self.watch_stream, args=(api_client,))
