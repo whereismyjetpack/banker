@@ -21,6 +21,7 @@ steps:
   commands:
   - 'sed -i "s~image:.*~image: wheresimyjetpack\/banker:$DRONE_BUILD_NUMBER~g" deploy/deployment.yaml'
   - git remote set-url origin git@github.com:$DRONE_REPO
+  - mkdir $HOME/.ssh
   - echo -n "$GIT_PUSH_SSH_KEY" > $HOME/.ssh/id_rsa
   - chmod 400 $HOME/.ssh/id_rsa
   - git config user.email "drone@drone-test.dsrd.libraries.psu.edu"
