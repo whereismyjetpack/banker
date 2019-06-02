@@ -32,6 +32,11 @@ steps:
   - git commit -m "[skip ci] adds $DRONE_BUILD_NUMBER"
   - git push -u origin $DRONE_BRANCH
 
+- name: things
+  image: whereismyjetpack/drone-git-push
+  settings:
+    token: foo
+
 volumes:
 - name: docker-sock
   host:
