@@ -23,7 +23,7 @@ steps:
   - git remote set-url origin git@github.com:$DRONE_REPO
   - mkdir $HOME/.ssh
   - ssh-keyscan github.com >> $HOME/.ssh/known_hosts
-  - echo -n "$GIT_PUSH_SSH_KEY" > $HOME/.ssh/id_rsa
+  - echo -n $GIT_PUSH_SSH_KEY > $HOME/.ssh/id_rsa
   - chmod 400 $HOME/.ssh/id_rsa
   - git config user.email "drone@drone-test.dsrd.libraries.psu.edu"
   - git config user.name "DroneCI"
