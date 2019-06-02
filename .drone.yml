@@ -26,7 +26,7 @@ steps:
   settings:
     token:
       from_secret: GITHUB_ACCESS_TOKEN
-    message: adding things
+    message: 'adding things'
 
 volumes:
 - name: docker-sock
