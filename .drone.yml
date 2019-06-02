@@ -17,13 +17,13 @@ steps:
 #   - name: docker-sock
 #     path: /var/run/host.sock
 
-# - name: tag deployment
-#   image: alpine/git
-#   environment:
-#     GITHUB_ACCESS_TOKEN:
-#       from_secret: GITHUB_ACCESS_TOKEN
-#   commands:
-#   - 'sed -i "s~image:.*~image: wheresimyjetpack\/banker:$DRONE_BUILD_NUMBER~g" deploy/deployment.yaml'
+- name: tag deployment
+  image: alpine/git
+  environment:
+    GITHUB_ACCESS_TOKEN:
+      from_secret: GITHUB_ACCESS_TOKEN
+  commands:
+  - 'sed -i "s~image:.*~image: wheresimyjetpack\/banker:$DRONE_BUILD_NUMBER~g" deploy/deployment.yaml'
 #   - echo "machine github.com" > $HOME/.netrc
 #   - echo "login drone-ci" >> $HOME/.netrc
 #   - echo "password $GITHUB_ACCESS_TOKEN" >> $HOME/.netrc
@@ -36,7 +36,8 @@ steps:
 - name: things
   image: whereismyjetpack/drone-git-push
   settings:
-    token: foo
+    token:
+      from_secret: GITHUB_ACCESS_TOKEN
 
 # volumes:
 # - name: docker-sock
