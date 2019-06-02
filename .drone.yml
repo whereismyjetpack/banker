@@ -24,6 +24,7 @@ steps:
   - echo "login drone-ci" >> $HOME/.netrc
   - cat $HOME/.netrc
   - echo "password $GITHUB_ACCESS_TOKEN" >> $HOME/.netrc
+  - git remote -v
   - git config user.email "drone@drone-test.dsrd.libraries.psu.edu"
   - git config user.name "DroneCI"
   - git add deploy/deployment.yaml
