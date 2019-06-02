@@ -16,6 +16,16 @@ steps:
   - name: docker-sock
     path: /var/run/host.sock
 
+- name: tag deployment
+  image: alpine/git
+  commands:
+  - 'sed -i "s/image:.*/image: wheresimyjetpack\/banker:$DRONE_BUILD_NUMBER/g" deploy/deployment.yaml'
+  - git config user.email "drone@drone-test.dsrd.libraries.psu.edu"
+  - git config user.name "DroneCI"
+  - git add deploy/deployment.yaml
+  - git commit -m "[skip ci] adds $DRONE_BUILD_NUMBER"
+  - git push -u origin $DRONE_BRANCH
+
 volumes:
 - name: docker-sock
   host:
