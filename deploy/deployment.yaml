@@ -19,7 +19,7 @@ spec:
       serviceAccountName: banker
       containers:
       - name: banker
-        image: wheresimyjetpack/banker:58
+        image: wheresimyjetpack/banker:59
         env:
         - name: KUBERNETES_VAULT_ROLE
           value: banker-dev
