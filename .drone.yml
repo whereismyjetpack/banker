@@ -22,7 +22,7 @@ steps:
   - 'sed -i "s~image:.*~image: wheresimyjetpack\/banker:$DRONE_BUILD_NUMBER~g" deploy/deployment.yaml'
   - echo "machine github.com" > $HOME/.netrc
   - echo "username whereismyjetpack" >> $HOME/.netrc
-  - echo "password $GITHUB_ACCESS_TOKEN" >> $HOME/.netrckjjj
+  - echo "password $GITHUB_ACCESS_TOKEN" >> $HOME/.netrc
   - git config user.email "drone@drone-test.dsrd.libraries.psu.edu"
   - git config user.name "DroneCI"
   - git add deploy/deployment.yaml
