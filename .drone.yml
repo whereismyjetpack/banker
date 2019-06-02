@@ -19,7 +19,7 @@ steps:
 - name: tag deployment
   image: alpine/git
   commands:
-  - 'sed -i "s~image:.*~image: wheresimyjetpack\/banker:$DRONE_BUILD_NUMBER/g" deploy/deployment.yaml'
+  - 'sed -i "s~image:.*~image: wheresimyjetpack\/banker:$DRONE_BUILD_NUMBER~g" deploy/deployment.yaml'
   - git remote set-url origin git@github.com:$DRONE_REPO
   - echo -n "$GIT_PUSH_SSH_KEY" > $HOME/.ssh/id_rsa
   - chmod 400 $HOME/.ssh/id_rsa
