@@ -70,7 +70,7 @@ class Banker:
 
         return vault_client
 
-    def create_secret(self, namespace, name, data, uid):
+    def create_secret(self, namespace, name, data, uid, secret_type):
         v1 = kubernetes.client.CoreV1Api()
         for k in data:
             data[k] = base64.b64encode(data[k].encode()).decode()
@@ -84,7 +84,7 @@ class Banker:
         metadata = kubernetes.client.V1ObjectMeta(
             name=name, namespace=namespace, owner_references=owners
         )
-        body = kubernetes.client.V1Secret("v1", data, kind, metadata)
+        body = kubernetes.client.V1Secret("v1", data, kind, metadata, None, secret_type)
         try:
             logger.debug(f"checking secret {name} in namespace {namespace}")
             v1.create_namespaced_secret(namespace, body)
@@ -118,6 +118,7 @@ class Banker:
         uid = obj["metadata"]["uid"]
         path = obj["spec"].get("path", None)
         sync = str(obj["spec"].get("sync", "false")).lower()
+        secret_type = obj["spec"].get("type", None)
 
         if sync in self.truthy_values:
             sync = True
@@ -147,7 +148,7 @@ class Banker:
             logger.debug(f"reading secret from {path}")
             secret = self.vault_client.secrets.kv.v2.read_secret_version(path=path)
             data = secret["data"]["data"]
-            self.create_secret(namespace, name, data, uid)
+            self.create_secret(namespace, name, data, uid, secret_type)
 
     def watch_stream(self, client):
         crds_watch = kubernetes.client.CustomObjectsApi(client)
