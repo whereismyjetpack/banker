@@ -1,4 +1,4 @@
-hvac==0.8.2
+hvac==0.10.0
 loguru==0.2.5
 kubernetes==9.0.0
 PyYAML==5.1
