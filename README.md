@@ -1,6 +1,3 @@
-[![Build Status](https://drone-test.dsrd.libraries.psu.edu/api/badges/whereismyjetpack/banker/status.svg)](https://drone-test.dsrd.libraries.psu.edu/whereismyjetpack/banker)
-
-
 # Banker 🏦
 Banker is a controller meant to syncronize values from Vault, into proper Kubernetes secrets. 
 
