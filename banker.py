@@ -36,11 +36,13 @@ class Banker:
         self.sync_frequency_seconds = os.environ.get(
             "BANKER_SYNC_FREQUENCY_SECONDS", 60
         )
-        self.vault_addr = os.environ.get("VAULT_ADDR", "http://k127.0.0.1:8200")
+        self.vault_addr = os.environ.get("VAULT_ADDR", "http://127.0.0.1:8200")
         self.vault_token = os.environ.get("VAULT_TOKEN", None)
         self.vault_auth_type = os.environ.get("VAULT_AUTH_TYPE", "ServiceAccount")
         if self.vault_auth_type not in valid_auth_types:
-            logger.debug(f"{self.vault_auth_type} is not a valid auth type. Defaulting to Token")
+            logger.debug(
+                f"{self.vault_auth_type} is not a valid auth type. Defaulting to Token"
+            )
             self.vault_auth_type = "Token"
         self.kubernetes_vault_role = os.environ.get("KUBERNETES_VAULT_ROLE", None)
         self.vault_mount_path = os.environ.get("VAULT_MOUNT_PATH", "kubernetes")
