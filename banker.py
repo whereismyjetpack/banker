@@ -188,7 +188,7 @@ class Banker:
             renew = Thread(target=self.renew_token, args=(sleep_time,))
             renew.start()
 
-        k8s_config = kubernetes.client.Configuration()
+        k8s_config = kubernetes.client.Configuration.get_default_copy()
         k8s_config.assert_hostname = False
         api_client = kubernetes.client.api_client.ApiClient(configuration=k8s_config)
         self.resource_version = ""
