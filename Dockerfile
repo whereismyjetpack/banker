@@ -1,4 +1,4 @@
-FROM python:3.9.4-alpine
+FROM python:3.9.6-alpine
 RUN mkdir /app
 
 RUN adduser app -D
