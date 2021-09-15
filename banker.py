@@ -17,7 +17,6 @@ class Banker:
         self.get_config()
         self.truthy_values = ["true", "yes", "y"]
         self.dont_sync = []
-        self.seen_uids = []
         self.vault_client = self.get_vault_client()
 
     def get_config(self):
@@ -125,10 +124,6 @@ class Banker:
             sync = True
         else:
             sync = False
-
-        # if we are on the first pass, we sync
-        if uid not in self.seen_uids:
-            sync = True
 
         # If a user adds sync: true to an already proccessed object
         if sync and uid in self.dont_sync:
