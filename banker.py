@@ -204,5 +204,3 @@ class Banker:
 if __name__ == "__main__":
     b = Banker()
     b.run()
-
-
