@@ -19,7 +19,6 @@ class Banker:
         self.dont_sync = []
         self.seen_uids = []
         self.vault_client = self.get_vault_client()
-        self.run()
 
     def get_config(self):
         logger.remove(0)
@@ -204,7 +203,6 @@ class Banker:
 
 if __name__ == "__main__":
     b = Banker()
+    b.run()
 
 
-def run():
-    Banker()
