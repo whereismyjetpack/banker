@@ -1,5 +1,9 @@
-FROM python:3.9.0-alpine
+FROM python:3.9.6-alpine
 RUN mkdir /app
+
+RUN adduser app -D
+
+USER app
 
 WORKDIR /app
 COPY requirements.txt /app
