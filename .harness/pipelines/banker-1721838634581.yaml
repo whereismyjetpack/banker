@@ -1,0 +1,59 @@
+pipeline:
+  identifier: Build_whereismyjetpack_banker_1721838636044
+  name: Build banker
+  orgIdentifier: default
+  projectIdentifier: default_project
+  properties:
+    ci:
+      codebase:
+        build: <+input>
+        connectorRef: account.Github_OAuth_1721838443932
+        repoName: whereismyjetpack/banker
+  stages:
+    - stage:
+        identifier: build
+        name: build
+        spec:
+          caching:
+            enabled: true
+          cloneCodebase: true
+          execution:
+            steps:
+              - step:
+                  identifier: runlinter
+                  name: run linter
+                  spec:
+                    command: |-
+                      pip install flake8
+                      flake8 --config=.flake8 .
+                  timeout: ""
+                  type: Run
+              - step:
+                  identifier: setupvirtualenvironment
+                  name: setup virtual environment
+                  spec:
+                    command: |-
+                      python3 -m venv .venv
+                      . .venv/bin/activate
+                      python3 -m pip install -r requirements.txt
+                      python3 -m pip install -e .
+                  timeout: ""
+                  type: Run
+              - step:
+                  identifier: dockerbuild
+                  name: docker_build
+                  spec:
+                    caching: true
+                    connectorRef: <+input>
+                    repo: hello/world
+                    tags:
+                      - latest
+                  timeout: ""
+                  type: BuildAndPushDockerRegistry
+          platform:
+            arch: Amd64
+            os: Linux
+          runtime:
+            spec: {}
+            type: Docker
+        type: CI
