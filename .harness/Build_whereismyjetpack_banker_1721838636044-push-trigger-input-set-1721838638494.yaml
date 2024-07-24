@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_whereismyjetpack_banker_1721838636044-push-trigger-input-set
+  identifier: Build_whereismyjetpack_banker_1721838636044pushtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: Build_whereismyjetpack_banker_1721838636044
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>
